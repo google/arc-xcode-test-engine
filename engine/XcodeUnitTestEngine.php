@@ -90,6 +90,13 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
   public function run() {
     $this->loadEnvironment();
 
+    if (!$this->getRunAllTests()) {
+      $paths = $this->getPaths();
+      if (empty($paths)) {
+        return array();
+      }
+    }
+
     $xcodeargs = array();
     foreach ($this->xcodebuild as $key => $value) {
       $xcodeargs []= "-$key \"$value\"";
