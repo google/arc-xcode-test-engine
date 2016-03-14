@@ -1,3 +1,8 @@
+## 1.0.1
+
+* Don't run unit tests if no files were provided to the engine and we're not being asked
+  to run all tests.
+
 ## 1.0.0
 
 * Initial release.
