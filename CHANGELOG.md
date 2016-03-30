@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Coverage is now enabled and **reported** unless explicitly disabled with --no-coverage.
+
 ## 1.1.0
 
 * Coverage is now enabled unless explicitly disabled with --no-coverage.
