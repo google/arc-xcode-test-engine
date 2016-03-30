@@ -1,3 +1,8 @@
+## 2.0.0
+
+* Coverage is now enabled and **reported** unless explicitly disabled with --no-coverage.
+* xcodebuild or llvm-cov failures now properly throw exceptions rather than silently continuing.
+
 ## 1.1.0
 
 * Coverage is now enabled unless explicitly disabled with --no-coverage.
