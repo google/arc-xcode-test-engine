@@ -42,6 +42,16 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     return false; // i.e. this engine does not output its own results.
   }
 
+  private function shouldGenerateCoverage() {
+    // getEnableCoverage return value meanings:
+    // false: User passed --no-coverage, explicitly disabling coverage.
+    // null:  User did not pass any coverage flags. Coverage should generally be enabled if
+    //        available.
+    // true:  User passed --coverage.
+    // https://secure.phabricator.com/T10561
+    return $this->getEnableCoverage() !== false;
+  }
+
   protected function loadEnvironment() {
     $this->projectRoot = $this->getWorkingCopy()->getProjectRoot();
     $config_path = $this->getWorkingCopy()->getProjectPath('.arcconfig');
@@ -78,18 +88,12 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     }
 
     $this->xcodebuild = $config['unit.xcode']['build'];
-    
-    // getEnableCoverage return value meanings:
-    // false: User passed --no-coverage, explicitly disabling coverage.
-    // null:  User did not pass any coverage flags. Coverage should generally be enabled if
-    //        available.
-    // true:  User passed --coverage.
-    // https://secure.phabricator.com/T10561
-    if ($this->getEnableCoverage() === false) {
-      $this->xcodebuild["enableCodeCoverage"] = "NO";
-    } else {
+
+    if ($this->shouldGenerateCoverage()) {
       $this->xcodebuild["enableCodeCoverage"] = "YES";
       $this->coverage = $config['unit.xcode']['coverage'];
+    } else {
+      $this->xcodebuild["enableCodeCoverage"] = "NO";
     }
   }
 
@@ -115,7 +119,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     // Extract coverage information
     $coverage = null;
-    if ($this->getEnableCoverage()) {
+    if ($this->shouldGenerateCoverage()) {
       // Get the OBJROOT
       $future = new ExecFuture('%C %C -showBuildSettings test',
         $this->xcodebuildBinary, implode(' ', $xcodeargs));
@@ -141,7 +145,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     // might be a cleaner approach.
 
     return id(new XcodeTestResultParser())
-      ->setEnableCoverage($this->getEnableCoverage())
+      ->setEnableCoverage($this->shouldGenerateCoverage())
       ->setCoverageFile($coverage)
       ->setProjectRoot($this->projectRoot)
       ->setStderr($xcbuild_stderr)
