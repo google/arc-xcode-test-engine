@@ -115,7 +115,14 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     // Build and run unit tests
     $future = new ExecFuture('%C %C test',
       $this->xcodebuildBinary, implode(' ', $xcodeargs));
-    list(, $xcbuild_stdout, $xcbuild_stderr) = $future->resolve();
+
+    try {
+      list($xcbuild_stdout, $xcbuild_stderr) = $future->resolvex();
+    } catch (CommandException $exc) {
+      if ($exc->getError() != 0) {
+        throw $exc;
+      }
+    }
 
     // Extract coverage information
     $coverage = null;
@@ -136,7 +143,14 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
       $future = new ExecFuture('%C show -use-color=false -instr-profile "%C" "%C"',
         $this->covBinary, $profdata, $product);
-      list(, $coverage, $coverage_error) = $future->resolve();
+
+      try {
+        list($coverage, $coverage_error) = $future->resolvex();
+      } catch (CommandException $exc) {
+        if ($exc->getError() != 0) {
+          throw $exc;
+        }
+      }
     }
     
     // TODO(featherless): If we publicized the parseCoverageResults method on
