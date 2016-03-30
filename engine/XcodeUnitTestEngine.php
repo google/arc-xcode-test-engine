@@ -79,11 +79,17 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     $this->xcodebuild = $config['unit.xcode']['build'];
     
-    if ($this->getEnableCoverage()) {
+    // getEnableCoverage return value meanings:
+    // false: User passed --no-coverage, explicitly disabling coverage.
+    // null:  User did not pass any coverage flags. Coverage should generally be enabled if
+    //        available.
+    // true:  User passed --coverage.
+    // https://secure.phabricator.com/T10561
+    if ($this->getEnableCoverage() === false) {
+      $this->xcodebuild["enableCodeCoverage"] = "NO";
+    } else {
       $this->xcodebuild["enableCodeCoverage"] = "YES";
       $this->coverage = $config['unit.xcode']['coverage'];
-    } else {
-      $this->xcodebuild["enableCodeCoverage"] = "NO";
     }
   }
 
