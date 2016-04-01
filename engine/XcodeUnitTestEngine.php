@@ -116,17 +116,18 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     $future = new ExecFuture('%C %C test',
       $this->xcodebuildBinary, implode(' ', $xcodeargs));
 
-    try {
-      list($xcbuild_stdout, $xcbuild_stderr) = $future->resolvex();
-    } catch (CommandException $exc) {
-      if ($exc->getError() != 0) {
-        throw $exc;
-      }
+    list($builderror, $xcbuild_stdout, $xcbuild_stderr) = $future->resolve();
+
+    // Error-code 65 is thrown for build/unit test failures.
+    if ($builderror !== 0 && $builderror !== 65) {
+      return array(id(new ArcanistUnitTestResult())
+        ->setUserData($this->stderr)
+        ->setResult(ArcanistUnitTestResult::RESULT_BROKEN));
     }
 
     // Extract coverage information
     $coverage = null;
-    if ($this->shouldGenerateCoverage()) {
+    if ($builderror === 0 && $this->shouldGenerateCoverage()) {
       // Get the OBJROOT
       $future = new ExecFuture('%C %C -showBuildSettings test',
         $this->xcodebuildBinary, implode(' ', $xcodeargs));
@@ -162,6 +163,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       ->setEnableCoverage($this->shouldGenerateCoverage())
       ->setCoverageFile($coverage)
       ->setProjectRoot($this->projectRoot)
+      ->setXcodeArgs($xcodeargs)
       ->setStderr($xcbuild_stderr)
       ->parseTestResults(null, $xcbuild_stdout);
   }

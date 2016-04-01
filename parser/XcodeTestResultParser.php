@@ -23,6 +23,13 @@
  */
 final class XcodeTestResultParser extends ArcanistTestResultParser {
 
+  private $xcodeargs;
+
+  public function setXcodeArgs($args) {
+    $this->xcodeargs = $args;
+    return $this;
+  }
+
   /**
    * Parses stdout of `xcodebuild` as provided via $test_results and returns an
    * array of ArcanistUnitTestResult instances.
@@ -44,7 +51,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
     $results = array();
     $accumulator = array();
     $suite = null;
-    
+
     // Break the test result stdout into lines.
     foreach(preg_split("/((\r?\n)|(\r\n?))/", $test_results) as $line) {
       if ($this->startsWith($line, 'Test Suite')) {
@@ -56,6 +63,20 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         continue;
       }
 
+      if ($this->startsWith($line, 'error: ')) {
+        $result = new ArcanistUnitTestResult();
+        $result->setName('xcode-unit-engine');
+        foreach ($this->xcodeargs as $arg) {
+          if (preg_match('/-scheme (.+)/', $arg, $matches)) {
+            $result->setName(trim($matches[1], "'\""));
+            break;
+          }
+        }
+        $result->setResult(ArcanistUnitTestResult::RESULT_BROKEN);
+        $result->setUserData($line);
+        $results []= $result;
+        continue;
+      }
       // Test has started?
       if ($this->endsWith($line, 'started.')) {
         $accumulator = array();
@@ -67,7 +88,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         $accumulator []= $line;
         continue;
       }
-      
+
       // End of a test.
       if (!preg_match('/\'-\[.+? test(.+?)\]\' (.+?) \((.+?) seconds\\).$/', $line, $matches)) {
         echo "Unable to parse line:\n$line\n";
@@ -76,7 +97,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
 
       $userdata = implode("\n", $accumulator);
       $userdata = str_replace($this->projectRoot.'/', '', $userdata);
-      
+
       $result = new ArcanistUnitTestResult();
       $result->setName($matches[1]);
       if ($suite) {
