@@ -1,3 +1,8 @@
+## 2.0.2
+
+* Error line detection is now more flexible. Any output line with "error:" will be detected and
+  bubble up as an error.
+
 ## 2.0.1
 
 * Better handling of non-unit-test failures, such as CocoaPods getting out of sync.
