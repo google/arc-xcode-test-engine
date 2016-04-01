@@ -1,3 +1,7 @@
+## 2.0.1
+
+* Better handling of non-unit-test failures, such as CocoaPods getting out of sync.
+
 ## 2.0.0
 
 * Coverage is now enabled and **reported** unless explicitly disabled with --no-coverage.
