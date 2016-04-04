@@ -1,3 +1,7 @@
+## 2.1.0
+
+* Added a `pre-build` configuration option.
+
 ## 2.0.2
 
 * Error line detection is now more flexible. Any output line with "error:" will be detected and
