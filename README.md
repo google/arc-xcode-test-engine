@@ -97,11 +97,18 @@ Now modify your `.arcconfig` file by adding the following configuration:
 
 ### Configuration options
 
+#### Build configuration options
+
+Any value provided to "build" will be passed along to xcodebuild as a flag.
+
     "unit.xcode": {
       "build": { ... }
     }
 
-Any value provided to "build" will be passed along to xcodebuild as a flag.
+#### Picking the coverage product
+
+Provide the path to the product for which coverage should be calculated. If building a
+library/framework this might be the framework binary product.
 
     "unit.xcode": {
       "coverage": {
@@ -109,18 +116,21 @@ Any value provided to "build" will be passed along to xcodebuild as a flag.
       }
     }
 
-Provide the path to the product for which coverage should be
-calculated. If building a library/framework this might be the
-framework binary product.
+#### Pre-build commands
+
+Some projects require a pre-build script that runs before the xcodebuild command.
+
+    "unit.xcode": {
+      "pre-build": "execute this command before the build step"
+    }
+
+For example, CocoaPods projects may need to be re-generated.
+
+      "pre-build": "pod install --project-directory=path/ --no-repo-update"
 
 ### Viewing coverage results in Phabricator
 
-To view coverage results in Phabricator diff UI you must run
-
-    arc diff --coverage
-
-Coverage will appear for affected source files in Side-by-Side
-mode as a colored bar.
+Coverage will appear for affected source files in Side-by-Side mode as a colored bar.
 
 ## License
 

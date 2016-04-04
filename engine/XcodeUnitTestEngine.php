@@ -29,6 +29,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
   private $affectedTests;
   private $xcodebuild;
   private $coverage;
+  private $preBuildCommand;
 
   public function getEngineConfigurationName() {
     return 'xcode-test-engine';
@@ -95,6 +96,10 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     } else {
       $this->xcodebuild["enableCodeCoverage"] = "NO";
     }
+
+    if (array_key_exists('pre-build', $config['unit.xcode'])) {
+      $this->preBuildCommand = $config['unit.xcode']['pre-build'];
+    }
   }
 
   public function run() {
@@ -110,6 +115,11 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     $xcodeargs = array();
     foreach ($this->xcodebuild as $key => $value) {
       $xcodeargs []= "-$key \"$value\"";
+    }
+
+    if (!empty($this->preBuildCommand)) {
+      $future = new ExecFuture($this->preBuildCommand);
+      $future->resolvex();
     }
 
     // Build and run unit tests
@@ -135,7 +145,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       if (!preg_match('/OBJROOT = (.+)/', $settings_stdout, $matches)) {
         throw new Exception('Unable to find OBJROOT configuration.');
       }
-      
+
       $objroot = $matches[1];
       $covroot = $objroot."/CodeCoverage/".$this->xcodebuild['scheme'];
       $profdata = $covroot."/Coverage.profdata";
