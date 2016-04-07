@@ -1,3 +1,7 @@
+## 2.1.1
+
+* Improved overall test parsing time by approximately 50%.
+
 ## 2.1.0
 
 * Added a `pre-build` configuration option.
