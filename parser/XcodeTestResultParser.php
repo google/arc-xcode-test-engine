@@ -63,7 +63,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         continue;
       }
 
-      if (preg_match('/.+?error:/', $line) === 1) {
+      if (strpos($line, 'error:') !== false) {
         $result = new ArcanistUnitTestResult();
         $result->setName('xcode-unit-engine');
         foreach ($this->xcodeargs as $arg) {

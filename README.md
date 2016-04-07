@@ -1,6 +1,7 @@
 # xcode-test-engine for arc
 
-xcode-test-engine is a test engine for use with [Phabricator](phabricator.org)'s `arc` command line tool.
+xcode-test-engine is a test engine for use with [Phabricator](http://phabricator.org)'s `arc`
+command line tool.
 
 ## Features
 
