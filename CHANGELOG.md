@@ -1,3 +1,9 @@
+## 3.0.1
+
+* If tests fail to build we no longer generate a
+  `Unhandled Exception ("PhutilTypeMissingParametersException")` exception on Phabricator. We were
+  not previously providing a name to the ArcanistUnitTestResult instance.
+
 ## 3.0.0
 
 * Commands now always run from the root directory of the project rather than from the shell's
