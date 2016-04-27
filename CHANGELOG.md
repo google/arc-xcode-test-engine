@@ -1,3 +1,8 @@
+## 3.0.2
+
+* Resolves crash caused by referencing the wrong stderr variable. The error was
+  `Attempt to read from undeclared property XcodeUnitTestEngine::stderr`.
+
 ## 3.0.1
 
 * If tests fail to build we no longer generate a

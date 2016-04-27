@@ -133,7 +133,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     if ($builderror !== 0 && $builderror !== 65) {
       return array(id(new ArcanistUnitTestResult())
         ->setName("Xcode test engine")
-        ->setUserData($this->stderr)
+        ->setUserData($xcbuild_stderr)
         ->setResult(ArcanistUnitTestResult::RESULT_BROKEN));
     }
 
