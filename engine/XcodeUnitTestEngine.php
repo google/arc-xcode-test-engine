@@ -119,6 +119,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     if (!empty($this->preBuildCommand)) {
       $future = new ExecFuture($this->preBuildCommand);
+      $future->setCWD(Filesystem::resolvePath($this->getWorkingCopy()->getProjectRoot()));
       $future->resolvex();
     }
 
@@ -141,6 +142,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       // Get the OBJROOT
       $future = new ExecFuture('%C %C -showBuildSettings test',
         $this->xcodebuildBinary, implode(' ', $xcodeargs));
+      $future->setCWD(Filesystem::resolvePath($this->getWorkingCopy()->getProjectRoot()));
       list(, $settings_stdout, ) = $future->resolve();
       if (!preg_match('/OBJROOT = (.+)/', $settings_stdout, $matches)) {
         throw new Exception('Unable to find OBJROOT configuration.');
@@ -154,6 +156,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
       $future = new ExecFuture('%C show -use-color=false -instr-profile "%C" "%C"',
         $this->covBinary, $profdata, $product);
+      $future->setCWD(Filesystem::resolvePath($this->getWorkingCopy()->getProjectRoot()));
 
       try {
         list($coverage, $coverage_error) = $future->resolvex();

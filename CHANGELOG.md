@@ -1,3 +1,8 @@
+## 3.0.0
+
+* Commands now always run from the root directory of the project rather than from the shell's
+  current working directory. This may be a breaking change.
+
 ## 2.1.1
 
 * Improved overall test parsing time by approximately 50%.
