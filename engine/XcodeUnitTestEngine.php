@@ -132,6 +132,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     // Error-code 65 is thrown for build/unit test failures.
     if ($builderror !== 0 && $builderror !== 65) {
       return array(id(new ArcanistUnitTestResult())
+        ->setName("Xcode test engine")
         ->setUserData($this->stderr)
         ->setResult(ArcanistUnitTestResult::RESULT_BROKEN));
     }

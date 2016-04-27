@@ -37,7 +37,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
   public function parseTestResults($path, $test_results) {
     if (!$test_results) {
       $result = id(new ArcanistUnitTestResult())
-        ->setName($path)
+        ->setName("Xcode test engine")
         ->setUserData($this->stderr)
         ->setResult(ArcanistUnitTestResult::RESULT_BROKEN);
       return array($result);
