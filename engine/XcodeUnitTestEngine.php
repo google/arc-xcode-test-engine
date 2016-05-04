@@ -148,15 +148,18 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       if (!preg_match('/OBJROOT = (.+)/', $settings_stdout, $matches)) {
         throw new Exception('Unable to find OBJROOT configuration.');
       }
-
       $objroot = $matches[1];
-      $covroot = $objroot."/CodeCoverage/".$this->xcodebuild['scheme'];
-      $profdata = $covroot."/Coverage.profdata";
-      // TODO(featherless): Find a better way to identify which Product was built.
-      $product = $covroot."/Products/Debug-iphonesimulator/".$this->coverage['product'];
+
+      $future = new ExecFuture("find %C -name Coverage.profdata", $objroot);
+      list(, $coverage_stdout, ) = $future->resolve();
+      $profdata_path = explode("\n", $coverage_stdout)[0];
+
+      $future = new ExecFuture("find %C | grep %C", $objroot, $this->coverage['product']);
+      list(, $product_stdout, ) = $future->resolve();
+      $product_path = explode("\n", $product_stdout)[0];
 
       $future = new ExecFuture('%C show -use-color=false -instr-profile "%C" "%C"',
-        $this->covBinary, $profdata, $product);
+        $this->covBinary, $profdata_path, $product_path);
       $future->setCWD(Filesystem::resolvePath($this->getWorkingCopy()->getProjectRoot()));
 
       try {
