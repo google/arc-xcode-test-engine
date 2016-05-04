@@ -1,3 +1,7 @@
+## 3.0.3
+
+* Resolved coverage failure with Xcode 7.3 and newer. Thanks to [aelam](https://github.com/aelam) for filing [#2](https://github.com/google/arc-xcode-test-engine/issues/2).
+
 ## 3.0.2
 
 * Resolves crash caused by referencing the wrong stderr variable. The error was
