@@ -54,6 +54,8 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
 
     // Break the test result stdout into lines.
     foreach(preg_split("/((\r?\n)|(\r\n?))/", $test_results) as $line) {
+      $inTestCase = false;
+
       if ($this->startsWith($line, 'Test Suite')) {
         if (preg_match('/Test Suite \'(.+?)\' started/', $line, $matches)) {
           $suite = $matches[1];
@@ -63,7 +65,21 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         continue;
       }
 
-      if (strpos($line, 'error:') !== false) {
+      // Test has started?
+      if ($this->endsWith($line, 'started.')) {
+        $accumulator = array();
+        continue;
+      }
+      // Within a test, informational line.
+      if (!$this->startsWith($line, 'Test Case')) {
+        // Treat these lines as information for the test case.
+        $accumulator []= $line;
+        $inTestCase = true;
+        continue;
+      }
+
+      if ($inTestCase && strpos($line, 'error:') !== false) {
+        echo $line;
         $result = new ArcanistUnitTestResult();
         $result->setName('xcode-unit-engine');
         foreach ($this->xcodeargs as $arg) {
@@ -75,17 +91,6 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         $result->setResult(ArcanistUnitTestResult::RESULT_BROKEN);
         $result->setUserData($line);
         $results []= $result;
-        continue;
-      }
-      // Test has started?
-      if ($this->endsWith($line, 'started.')) {
-        $accumulator = array();
-        continue;
-      }
-      // Within a test, informational line.
-      if (!$this->startsWith($line, 'Test Case')) {
-        // Treat these lines as information for the test case.
-        $accumulator []= $line;
         continue;
       }
 
@@ -123,7 +128,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
 
       $accumulator = array();
     }
-    
+
     return $results;
   }
 
