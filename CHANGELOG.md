@@ -1,6 +1,6 @@
 ## 3.0.4
 
-* Resolved [issue #3](https://github.com/google/arc-xcode-test-engine/issues/3): Using test engine with Quick testing library gets "Unable to parse line" error. Thanks to [KevM](https://github.com/KevM) for filing.
+* Resolved [issue #3](https://github.com/google/arc-xcode-test-engine/issues/3): Using test engine with Quick testing library gets "Unable to parse line" error. Thanks to [KevM](https://github.com/KevM) for fixing.
 
 ## 3.0.3
 
