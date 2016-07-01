@@ -90,7 +90,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
       }
 
       // End of a test.
-      if (!preg_match('/\'-\[.+? test(.+?)\]\' (.+?) \((.+?) seconds\\).$/', $line, $matches)) {
+      if (!preg_match('/\'-\[\S*\s(?:test)*(.+?)\]\' (.+?) \((.+?) seconds\).$/', $line, $matches)) {
         echo "Unable to parse line:\n$line\n";
         continue;
       }
