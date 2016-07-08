@@ -146,6 +146,10 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
       }
       $file []= $line;
     }
+    if ($file && $filename) {
+      // Commit the hanging file.
+      $filemap[$filename] = $file;
+    }
 
     $arccovmap = array();
     foreach ($filemap as $filename => $coverage) {
