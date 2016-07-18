@@ -1,3 +1,6 @@
+# release-candidate
+
+ TODO: Enumerate changes.
 # 3.0.5
 
 * Resolved bug where coverage information was being lost for the last file in a coverage report.
