@@ -102,6 +102,47 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     }
   }
 
+  private function xcodeMajorVersion() {
+    $future = new ExecFuture('%C -version', $this->xcodebuildBinary);
+
+    list($errcode, $stdout, $stderr) = $future->resolve();
+
+    if (!$errcode && preg_match("/Xcode (.+)/", $stdout, $matches)) {
+      return intval($matches[1]);
+    }
+
+    return null;
+  }
+
+  public function execFutureEndOnLine($future, $line) {
+    $wait  = $future->getDefaultWait();
+    $hasSeenLine = false;
+    do {
+      if ($future->isReady()) {
+        break;
+      }
+
+      $read = $future->getReadSockets();
+      $write = $future->getWriteSockets();
+
+      if ($read || $write) {
+        Future::waitForSockets($read, $write, $wait);
+      }
+
+      $pipes = $future->read();
+      if (!$hasSeenLine && strpos($pipes[0], $line) !== false) {
+        $hasSeenLine = true;
+
+      } else if ($hasSeenLine && empty($pipes[0])) {
+        $results = $future->resolveKill();
+        $results[0] = 0; # Overwrite the 'kill' error code.
+        return $results;
+      }
+    } while (true);
+
+    return $future->getResult();
+  }
+
   public function run() {
     $this->loadEnvironment();
 
@@ -123,11 +164,26 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       $future->resolvex();
     }
 
-    // Build and run unit tests
-    $future = new ExecFuture('%C %C test',
-      $this->xcodebuildBinary, implode(' ', $xcodeargs));
+    $xcodeMajorVersion = $this->xcodeMajorVersion();
+    if ($xcodeMajorVersion && $xcodeMajorVersion >= 8) {
+      // Build and run unit tests
+      $future = new ExecFuture('%C build-for-testing %C',
+        $this->xcodebuildBinary, implode(' ', $xcodeargs));
+      list($builderror, $xcbuild_stdout, $xcbuild_stderr) = $future->resolve();
+      if (!$builderror) {
+        $future = new ExecFuture('%C test-without-building %C',
+          $this->xcodebuildBinary, implode(' ', $xcodeargs));
 
-    list($builderror, $xcbuild_stdout, $xcbuild_stderr) = $future->resolve();
+        list($builderror, $xcbuild_stdout, $xcbuild_stderr) =
+          $this->execFutureEndOnLine($future, "** TEST EXECUTE SUCCEEDED **");
+      }
+
+    } else {
+      // Build and run unit tests
+      $future = new ExecFuture('%C %C test',
+        $this->xcodebuildBinary, implode(' ', $xcodeargs));
+      list($builderror, $xcbuild_stdout, $xcbuild_stderr) = $future->resolve();
+    }
 
     // Error-code 65 is thrown for build/unit test failures.
     if ($builderror !== 0 && $builderror !== 65) {
@@ -170,7 +226,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
         }
       }
     }
-    
+
     // TODO(featherless): If we publicized the parseCoverageResults method on
     // XcodeTestResultParser we could parseTestResults, then call parseCoverageResults,
     // and the logic here would map the coverage results to the test results. This

@@ -1,3 +1,7 @@
+# 3.0.6
+
+* Workaround for bug in Xcode 8 betas 1 and 2 that cause `arc unit`.
+
 # 3.0.5
 
 * Resolved bug where coverage information was being lost for the last file in a coverage report.
