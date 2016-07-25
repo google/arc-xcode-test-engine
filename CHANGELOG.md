@@ -1,3 +1,6 @@
+# release-candidate
+
+ TODO: Enumerate changes.
 # 3.0.6
 
 * Workaround for bug in Xcode 8 betas 1 and 2 that cause `arc unit` to hang.
