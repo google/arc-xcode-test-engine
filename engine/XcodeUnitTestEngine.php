@@ -114,7 +114,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     return null;
   }
 
-  public function execFutureEndOnLine($future, $line) {
+  public function execFutureEndOnLine($future, $stdoutline, $stderrline) {
     $wait  = $future->getDefaultWait();
     $hasSeenLine = false;
     do {
@@ -130,7 +130,8 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
       }
 
       $pipes = $future->read();
-      if (!$hasSeenLine && strpos($pipes[0], $line) !== false) {
+      if (!$hasSeenLine && (strpos($pipes[0], $stdoutline) !== false
+                            || strpos($pipes[1], $stderrline) !== false)) {
         $hasSeenLine = true;
 
       } else if ($hasSeenLine && empty($pipes[0])) {
@@ -175,7 +176,10 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
           $this->xcodebuildBinary, implode(' ', $xcodeargs));
 
         list($builderror, $xcbuild_stdout, $xcbuild_stderr) =
-          $this->execFutureEndOnLine($future, "** TEST EXECUTE SUCCEEDED **");
+          $this->execFutureEndOnLine($future,
+            "** TEST EXECUTE SUCCEEDED **",
+            "** TEST EXECUTE FAILED **"
+          );
       }
 
     } else {
