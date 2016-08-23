@@ -1,3 +1,6 @@
+# release-candidate
+
+ TODO: Enumerate changes.
 # 3.0.7
 
 * Resolved bug in which a failed unit test on Xcode 8 betas would cause arc unit to hang.
