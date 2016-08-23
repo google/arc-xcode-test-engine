@@ -1,3 +1,7 @@
+# 3.1.0
+
+* Removed Xcode 8 betas 1-5 workaround. Beta 6 resolved the bug; please upgrade to Xcode 8 beta 6 before upgrading to 3.1.0 of this library.
+
 # 3.0.7
 
 * Resolved bug in which a failed unit test on Xcode 8 betas would cause arc unit to hang.
