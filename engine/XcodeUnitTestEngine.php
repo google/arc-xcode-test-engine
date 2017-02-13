@@ -30,6 +30,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
   private $xcodebuild;
   private $coverage;
   private $preBuildCommand;
+  private $shouldGenerateCoverage;
 
   public function getEngineConfigurationName() {
     return 'xcode-test-engine';
@@ -41,16 +42,6 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
   public function shouldEchoTestResults() {
     return false; // i.e. this engine does not output its own results.
-  }
-
-  private function shouldGenerateCoverage() {
-    // getEnableCoverage return value meanings:
-    // false: User passed --no-coverage, explicitly disabling coverage.
-    // null:  User did not pass any coverage flags. Coverage should generally be enabled if
-    //        available.
-    // true:  User passed --coverage.
-    // https://secure.phabricator.com/T10561
-    return $this->getEnableCoverage() !== false;
   }
 
   protected function loadEnvironment() {
@@ -90,10 +81,12 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     $this->xcodebuild = $config['unit.xcode']['build'];
 
-    if ($this->shouldGenerateCoverage()) {
+    if ($this->getEnableCoverage() && array_key_exists('coverage', $config['unit.xcode']))
+      $this->shouldGenerateCoverage = true
       $this->xcodebuild["enableCodeCoverage"] = "YES";
       $this->coverage = $config['unit.xcode']['coverage'];
     } else {
+      $this->shouldGenerateCoverage = false
       $this->xcodebuild["enableCodeCoverage"] = "NO";
     }
 
@@ -139,7 +132,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     // Extract coverage information
     $coverage = null;
-    if ($builderror === 0 && $this->shouldGenerateCoverage()) {
+    if ($builderror === 0 && $this->shouldGenerateCoverage {
       // Get the OBJROOT
       $future = new ExecFuture('%C %C -showBuildSettings test',
         $this->xcodebuildBinary, implode(' ', $xcodeargs));
@@ -177,7 +170,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     // might be a cleaner approach.
 
     return id(new XcodeTestResultParser())
-      ->setEnableCoverage($this->shouldGenerateCoverage())
+      ->setEnableCoverage($this->shouldGenerateCoverage
       ->setCoverageFile($coverage)
       ->setProjectRoot($this->projectRoot)
       ->setXcodeArgs($xcodeargs)
