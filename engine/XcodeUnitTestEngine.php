@@ -30,6 +30,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
   private $xcodebuild;
   private $coverage;
   private $preBuildCommand;
+  private $hasCoverageKey;
 
   public function getEngineConfigurationName() {
     return 'xcode-test-engine';
@@ -50,7 +51,9 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     //        available.
     // true:  User passed --coverage.
     // https://secure.phabricator.com/T10561
-    return $this->getEnableCoverage() !== false;
+    $arcCoverageFlag = $this->getEnableCoverage();
+
+    return ($arcCoverageFlag !== false) && $this->hasCoverageKey;
   }
 
   protected function loadEnvironment() {
@@ -89,6 +92,8 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     }
 
     $this->xcodebuild = $config['unit.xcode']['build'];
+
+    $this->hasCoverageKey = array_key_exists('coverage', $config['unit.xcode']);
 
     if ($this->shouldGenerateCoverage()) {
       $this->xcodebuild["enableCodeCoverage"] = "YES";
