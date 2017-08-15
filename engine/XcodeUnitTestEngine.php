@@ -56,7 +56,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     return ($arcCoverageFlag !== false) && $this->hasCoverageKey;
   }
 
-  private function readArcConfig() {
+  private function checkArcConfig() {
     // Checks if the config file `.arcconfig` exists and in valid JSON format, then return it.
     // function returns null if something wrong happened.
 
@@ -91,7 +91,7 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
   protected function loadEnvironment() {
     
-    $config = $this->readArcConfig();
+    $this->checkArcConfig();
 
     $config_manager = $this->getConfigurationManager();
     if ($config_manager == null) {
