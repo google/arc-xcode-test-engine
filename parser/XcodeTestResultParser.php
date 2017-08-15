@@ -134,13 +134,13 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
   }
 
   private function testCaseNameFromLine($line) {
-      if ($this->startsWith($line, 'Test Case')) {
-        $components = explode("'", $line);
-        if (sizeof($components) >= 2) {
-          return $components[1];
-        }
+    if ($this->startsWith($line, 'Test Case')) {
+      $components = explode("'", $line);
+      if (sizeof($components) >= 2) {
+        return $components[1];
       }
-      return null;
+    }
+    return null;
   }
 
   /**
