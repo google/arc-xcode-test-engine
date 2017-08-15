@@ -129,6 +129,42 @@ For example, CocoaPods projects may need to be re-generated.
 
       "pre-build": "pod install --project-directory=path/ --no-repo-update"
 
+### Supporting of multiple test engines
+We support using Arcanist multi test engine extension, visit the [extension]((https://github.com/tagview/arcanist-extensions#multi_test_engine) page to get more information about it.
+
+You `.arcconfig` file will have something similar to the following configuration:
+```
+{
+  "unit.engine": "MultiTestEngine",
+  "unit.engine.multi-test.engines": [
+    {
+      "engine": "XcodeUnitTestEngine",
+      "unit.engine.xcode.config": {
+        "build": {
+          "workspace": "YourWorkSpace.xcworkspace",
+          "scheme": "Scheme1",
+          "configuration": "Debug",
+          "destination": "platform=iOS Simulator,name=iPhone SE"
+        },
+        "coverage": {
+          "product": "SomeFramework.framework/SomeFramework"
+        }
+      }
+    },
+    {
+      "engine": "XcodeUnitTestEngine",
+      "unit.engine.xcode.config": {
+        "build": {
+          "workspace": "YourWorkSpace.xcworkspace",
+          "scheme": "AnotherScheme",
+          "configuration": "Debug"
+        }
+      }
+    }
+  ]
+}
+```
+
 ### Viewing coverage results in Phabricator
 
 Coverage will appear for affected source files in Side-by-Side mode as a colored bar.
