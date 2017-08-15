@@ -129,10 +129,12 @@ For example, CocoaPods projects may need to be re-generated.
 
       "pre-build": "pod install --project-directory=path/ --no-repo-update"
 
-### Supporting of multiple test engines
-We support using Arcanist multi test engine extension, visit the [extension]((https://github.com/tagview/arcanist-extensions#multi_test_engine) page to get more information about it.
+### Supporting multiple test engines
 
-You `.arcconfig` file will have something similar to the following configuration:
+We support Arcanist's *multi test engine* extension. Visit the [extension]((https://github.com/tagview/arcanist-extensions#multi_test_engine) page to learn more about it.
+
+Your `.arcconfig` file will have something similar to the following configuration:
+
 ```
 {
   "unit.engine": "MultiTestEngine",
