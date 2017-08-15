@@ -92,23 +92,22 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
   protected function loadEnvironment() {
     
     $config = $this->readArcConfig();
-    $unit_config = null;
 
     $config_manager = $this->getConfigurationManager();
-    if ($config_manager != null) {
-      $unit_config = $config_manager->getConfigFromAnySource('unit.engine.xcode.config');  
+    if ($config_manager == null) {
+      throw new ArcanistUsageException(
+        pht(
+          "Unable to setup configuration manager. Make sure that ".
+          "unit.engine is set properly in '%s'",
+          '.arcconfig'));
     }
-    
-    if ($unit_config == null && array_key_exists('unit.xcode', $config)) {
-      // falling back to unit.xcode
-      $unit_config = $config['unit.xcode'];
-    }
+    $unit_config = $config_manager->getConfigFromAnySource('unit.xcode');  
     
     if ($unit_config == null) {
       throw new ArcanistUsageException(
         pht(
-          "Unable to find '%s' neither '%s' keys in .arcconfig.",
-          'unit.xcode', 'unit.engine.multi-test.engines'));
+          "Unable to find '%s' keys in .arcconfig.",
+          'unit.xcode'));
     }
 
     $this->xcodebuild = $unit_config['build'];
