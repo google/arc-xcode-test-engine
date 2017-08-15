@@ -119,6 +119,9 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
     $xcodeargs = array();
     foreach ($this->xcodebuild as $key => $value) {
+      if ($key == "workspace") {
+        $value = $this->projectRoot."/".$value;
+      } 
       $xcodeargs []= "-$key \"$value\"";
     }
 
