@@ -155,7 +155,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
     foreach ($filemap as $filename => $coverage) {
       $cov = '';
       foreach ($coverage as $line) {
-        if (preg_match('/^ +([0-9]+)|/', $line, $matches)
+        if (preg_match('/^\s+\d+\|\s+(\d+)\|/', $line, $matches)
             && count($matches) > 1) {
           if (intval($matches[1]) > 0) {
             $cov .= 'C'; // Covered
