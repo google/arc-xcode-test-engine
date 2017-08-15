@@ -56,11 +56,12 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     return ($arcCoverageFlag !== false) && $this->hasCoverageKey;
   }
 
-  protected function loadEnvironment() {
+  private function checkArcConfigFile() {
+    // Throws exception if the config file `.arcconfig` is missing or it's in invalid JSON format. 
+
     $this->projectRoot = $this->getWorkingCopy()->getProjectRoot();
     $config_path = $this->getWorkingCopy()->getProjectPath('.arcconfig');
 
-    # TODO(featherless): Find a better way to configure the unit engine, possibly via .arcunit.
     if (!Filesystem::pathExists($config_path)) {
       throw new ArcanistUsageException(
         pht(
@@ -71,9 +72,8 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     }
 
     $data = Filesystem::readFile($config_path);
-    $config = null;
     try {
-      $config = phutil_json_decode($data);
+      phutil_json_decode($data);
     } catch (PhutilJSONParserException $ex) {
       throw new PhutilProxyException(
         pht(
@@ -83,27 +83,42 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
           $config_path),
         $ex);
     }
+  }
 
-    if (!array_key_exists('unit.xcode', $config)) {
+  protected function loadEnvironment() {
+    
+    $this->checkArcConfigFile();
+
+    $config_manager = $this->getConfigurationManager();
+    if ($config_manager == null) {
       throw new ArcanistUsageException(
         pht(
-          "Unable to find '%s' key in .arcconfig.",
+          "Unable to setup configuration manager. Make sure that ".
+          "unit.engine is set properly in '%s'",
+          '.arcconfig'));
+    }
+    $unit_config = $config_manager->getConfigFromAnySource('unit.xcode');  
+    
+    if ($unit_config == null) {
+      throw new ArcanistUsageException(
+        pht(
+          "Unable to find '%s' keys in .arcconfig.",
           'unit.xcode'));
     }
 
-    $this->xcodebuild = $config['unit.xcode']['build'];
+    $this->xcodebuild = $unit_config['build'];
 
-    $this->hasCoverageKey = array_key_exists('coverage', $config['unit.xcode']);
+    $this->hasCoverageKey = array_key_exists('coverage', $unit_config);
 
     if ($this->shouldGenerateCoverage()) {
       $this->xcodebuild["enableCodeCoverage"] = "YES";
-      $this->coverage = $config['unit.xcode']['coverage'];
+      $this->coverage = $unit_config['coverage'];
     } else {
       $this->xcodebuild["enableCodeCoverage"] = "NO";
     }
 
-    if (array_key_exists('pre-build', $config['unit.xcode'])) {
-      $this->preBuildCommand = $config['unit.xcode']['pre-build'];
+    if (array_key_exists('pre-build', $unit_config)) {
+      $this->preBuildCommand = $unit_config['pre-build'];
     }
   }
 
