@@ -56,14 +56,12 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     return ($arcCoverageFlag !== false) && $this->hasCoverageKey;
   }
 
-  private function checkArcConfig() {
-    // Checks if the config file `.arcconfig` exists and in valid JSON format, then return it.
-    // function returns null if something wrong happened.
+  private function checkArcConfigFile() {
+    // Throws exception if the config file `.arcconfig` is missing or it's in invalid JSON format. 
 
     $this->projectRoot = $this->getWorkingCopy()->getProjectRoot();
     $config_path = $this->getWorkingCopy()->getProjectPath('.arcconfig');
 
-    # TODO(featherless): Find a better way to configure the unit engine, possibly via .arcunit.
     if (!Filesystem::pathExists($config_path)) {
       throw new ArcanistUsageException(
         pht(
@@ -74,9 +72,8 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
     }
 
     $data = Filesystem::readFile($config_path);
-    $config = null;
     try {
-      $config = phutil_json_decode($data);
+      phutil_json_decode($data);
     } catch (PhutilJSONParserException $ex) {
       throw new PhutilProxyException(
         pht(
@@ -86,12 +83,11 @@ final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
           $config_path),
         $ex);
     }
-    return $config;
   }
 
   protected function loadEnvironment() {
     
-    $this->checkArcConfig();
+    $this->checkArcConfigFile();
 
     $config_manager = $this->getConfigurationManager();
     if ($config_manager == null) {
