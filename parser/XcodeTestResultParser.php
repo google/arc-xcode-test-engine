@@ -52,6 +52,7 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
     $accumulator = array();
     $suite = null;
 
+    $currentTestCase = null;
     // Break the test result stdout into lines.
     foreach(preg_split("/((\r?\n)|(\r\n?))/", $test_results) as $line) {
       if ($this->startsWith($line, 'Test Suite')) {
@@ -62,8 +63,14 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
         }
         continue;
       }
-
-      if (strpos($line, 'error:') !== false) {
+      // Get the current test case name
+      $testCase = $this->testCaseNameFromLine($line);
+      if ($testCase != null) {
+        $currentTestCase = $testCase;
+      }
+      // Check if the 'error:' exits and and this error is from a test case and NOT a log. 
+      // The test failure contains the test case name and we check that.
+      if (strpos($line, 'error:') !== false && $currentTestCase != null && strpos($line, $currentTestCase) !== false) {
         $result = new ArcanistUnitTestResult();
         $result->setName('xcode-unit-engine');
         foreach ($this->xcodeargs as $arg) {
@@ -123,8 +130,17 @@ final class XcodeTestResultParser extends ArcanistTestResultParser {
 
       $accumulator = array();
     }
-    
     return $results;
+  }
+
+  private function testCaseNameFromLine($line) {
+    if ($this->startsWith($line, 'Test Case')) {
+      $components = explode("'", $line);
+      if (sizeof($components) >= 2) {
+        return $components[1];
+      }
+    }
+    return null;
   }
 
   /**
