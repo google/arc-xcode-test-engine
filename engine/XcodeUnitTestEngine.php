@@ -22,7 +22,7 @@
  */
 final class XcodeUnitTestEngine extends ArcanistUnitTestEngine {
 
-  private $xcodebuildBinary = 'xcodebuild';
+  private $xcodebuildBinary = 'env NSUnbufferedIO=YES xcodebuild';
   private $covBinary = 'xcrun llvm-cov';
 
   private $projectRoot;
